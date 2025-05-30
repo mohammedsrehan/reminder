@@ -3,6 +3,7 @@ import './App.css';
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyCcJLhCtbdZmyyDkh49tgTyHFiii6MKAnA",
   authDomain: "reminder-f3bb2.firebaseapp.com",
@@ -12,6 +13,8 @@ const firebaseConfig = {
   appId: "1:736106555815:web:b19905d60c4286654f2e82",
   measurementId: "G-7B7XME3BY3"
 };
+
+
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -49,7 +52,8 @@ function App() {
         to,
         message,
         datetime,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        sent: false,
       });
       setStatus('success');
       fetchReminders();
