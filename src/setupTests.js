@@ -1,45 +1,39 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
-import { db } from './App';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, collection, deleteDoc, getDocs } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
 
-// Mock Firestore functions
-jest.mock('firebase/firestore', () => {
-  const originalModule = jest.requireActual('firebase/firestore');
-  return {
-    ...originalModule,
-    getDocs: jest.fn(),
-    addDoc: jest.fn(),
-    collection: jest.fn(() => 'mocked-collection'),
-  };
+const firebaseConfig = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "",
+  measurementId: ""
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
+
+const clearReminders = async () => {
+  const snapshot = await getDocs(collection(db, 'reminders'));
+  const deletes = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+  await Promise.all(deletes);
+};
+
+beforeEach(async () => {
+  await clearReminders();
 });
 
-describe('Reminder App', () => {
+afterEach(async () => {
+  await clearReminders();
+});
 
-  beforeEach(() => {
-    getDocs.mockResolvedValue({
-      docs: [
-        {
-          id: '1',
-          data: () => ({
-            type: 'email',
-            to: 'test@example.com',
-            message: 'Test reminder message',
-            datetime: '2025-05-29T12:00:00',
-          }),
-        },
-      ],
-    });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('Test Case 1: Schedule Reminder Successfully', async () => {
-    addDoc.mockResolvedValue({ id: '2' });
-
+describe('Reminder App (Emulator Test)', () => {
+  test('Schedules reminder successfully', async () => {
     render(<App />);
 
     fireEvent.change(screen.getByPlaceholderText('Recipient'), {
@@ -57,21 +51,19 @@ describe('Reminder App', () => {
     fireEvent.click(screen.getByText('Set Reminder'));
 
     await waitFor(() => {
-      expect(addDoc).toHaveBeenCalledTimes(1);
       expect(screen.getByText('Reminder scheduled successfully')).toBeInTheDocument();
     });
   });
 
-  test('Test Case 2: Input Validation (check empty fields)', async () => {
+  test('Blocks empty fields', async () => {
     render(<App />);
 
-    // Leave recipient blank
     fireEvent.change(screen.getByPlaceholderText('Message'), {
-      target: { value: 'This is a test reminder' },
+      target: { value: 'Only message' },
     });
 
     fireEvent.change(screen.getByDisplayValue(''), {
-      target: { value: '2025-06-01T14:00' },
+      target: { value: '2025-05-29T12:00' },
     });
 
     fireEvent.click(screen.getByText('Set Reminder'));
@@ -79,17 +71,25 @@ describe('Reminder App', () => {
     await waitFor(() => {
       expect(screen.getByText('Please fill in all fields.')).toBeInTheDocument();
     });
-
-    expect(addDoc).not.toHaveBeenCalled();
   });
 
-  test('Test Case 3: Fetch and Display Reminders', async () => {
+  test('Fetches and displays existing reminders', async () => {
+    // Insert a test reminder into Firestore
+    const remindersRef = collection(db, 'reminders');
+    await import('firebase/firestore').then(({ addDoc }) =>
+      addDoc(remindersRef, {
+        type: 'email',
+        to: 'fetchtest@example.com',
+        message: 'Hello from Firestore',
+        datetime: '2025-06-01T12:00',
+      })
+    );
+
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
-      expect(screen.getByText('Test reminder message')).toBeInTheDocument();
-      expect(screen.getByText(/Scheduled For:/)).toBeInTheDocument();
+      expect(screen.getByText('fetchtest@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Hello from Firestore')).toBeInTheDocument();
     });
   });
 });

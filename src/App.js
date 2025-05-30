@@ -7,13 +7,13 @@ import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCcJLhCtbdZmyyDkh49tgTyHFiii6MKAnA",
-  authDomain: "reminder-f3bb2.firebaseapp.com",
-  projectId: "reminder-f3bb2",
-  storageBucket: "reminder-f3bb2.firebasestorage.app",
-  messagingSenderId: "736106555815",
-  appId: "1:736106555815:web:b19905d60c4286654f2e82",
-  measurementId: "G-7B7XME3BY3"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "",
+  measurementId: ""
 };
 
 
