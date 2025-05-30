@@ -1,100 +1,95 @@
-// ReminderApp.test.js
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
-import '@testing-library/jest-dom';
+import { db } from './App';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
 
-// Mock Firestore
+// Mock Firestore functions
 jest.mock('firebase/firestore', () => {
-  let mockData = [];
-
+  const originalModule = jest.requireActual('firebase/firestore');
   return {
-    getFirestore: jest.fn(),
-    collection: jest.fn(() => 'reminders'),
-    addDoc: jest.fn(async (_collection, data) => {
-      mockData.push({ ...data });
-      return { id: 'mock-id' };
-    }),
-    getDocs: jest.fn(async () => ({
-      docs: mockData.map((doc, i) => ({
-        id: `mock-id-${i}`,
-        data: () => doc,
-      }))
-    })),
-    serverTimestamp: jest.fn(() => 'mock-timestamp'),
+    ...originalModule,
+    getDocs: jest.fn(),
+    addDoc: jest.fn(),
+    collection: jest.fn(() => 'mocked-collection'),
   };
 });
 
-describe('Reminder App Tests', () => {
+describe('Reminder App', () => {
+
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('Test Case 1: Schedule Reminder Successfully', async () => {
-    render(<App />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Recipient/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Message/i), {
-      target: { value: 'This is a test reminder' },
-    });
-    fireEvent.change(screen.getByDisplayValue(''), {
-      target: { value: '2025-05-29T10:00' },
-    });
-    fireEvent.click(screen.getByLabelText(/Email/i));
-    fireEvent.click(screen.getByText(/Set Reminder/i));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Reminder scheduled successfully/i)).toBeInTheDocument();
-    });
-  });
-
-  test('Test Case 2: Input Validation (Empty "To")', async () => {
-    render(<App />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Recipient/i), {
-      target: { value: '' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Message/i), {
-      target: { value: 'This is a test reminder' },
-    });
-    fireEvent.change(screen.getByDisplayValue(''), {
-      target: { value: '2025-06-01T14:00' },
-    });
-    fireEvent.click(screen.getByLabelText(/Email/i));
-    fireEvent.click(screen.getByText(/Set Reminder/i));
-
-    await waitFor(() => {
-      expect(screen.queryByText(/Reminder scheduled successfully/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Failed to schedule reminder/i)).toBeInTheDocument();
-    });
-  });
-
-  test('Test Case 3: Fetch and Display Reminders', async () => {
-    // Add a mock reminder to be fetched
-    const { getDocs } = require('firebase/firestore');
-    getDocs.mockResolvedValueOnce({
+    getDocs.mockResolvedValue({
       docs: [
         {
           id: '1',
           data: () => ({
-            to: 'fetch@example.com',
-            message: 'Reminder from DB',
-            datetime: '2025-06-01T14:00',
             type: 'email',
+            to: 'test@example.com',
+            message: 'Test reminder message',
+            datetime: '2025-05-29T12:00:00',
           }),
         },
       ],
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Test Case 1: Schedule Reminder Successfully', async () => {
+    addDoc.mockResolvedValue({ id: '2' });
 
     render(<App />);
 
+    fireEvent.change(screen.getByPlaceholderText('Recipient'), {
+      target: { value: 'test@example.com' },
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Message'), {
+      target: { value: 'This is a test reminder' },
+    });
+
+    fireEvent.change(screen.getByDisplayValue(''), {
+      target: { value: '2025-05-29T12:00' },
+    });
+
+    fireEvent.click(screen.getByText('Set Reminder'));
+
     await waitFor(() => {
-      expect(screen.getByText(/Scheduled Reminders/i)).toBeInTheDocument();
-      expect(screen.getByText(/fetch@example.com/i)).toBeInTheDocument();
-      expect(screen.getByText(/Reminder from DB/i)).toBeInTheDocument();
-      expect(screen.getByText(/Email/i)).toBeInTheDocument();
+      expect(addDoc).toHaveBeenCalledTimes(1);
+      expect(screen.getByText('Reminder scheduled successfully')).toBeInTheDocument();
+    });
+  });
+
+  test('Test Case 2: Input Validation (check empty fields)', async () => {
+    render(<App />);
+
+    // Leave recipient blank
+    fireEvent.change(screen.getByPlaceholderText('Message'), {
+      target: { value: 'This is a test reminder' },
+    });
+
+    fireEvent.change(screen.getByDisplayValue(''), {
+      target: { value: '2025-06-01T14:00' },
+    });
+
+    fireEvent.click(screen.getByText('Set Reminder'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Please fill in all fields.')).toBeInTheDocument();
+    });
+
+    expect(addDoc).not.toHaveBeenCalled();
+  });
+
+  test('Test Case 3: Fetch and Display Reminders', async () => {
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Test reminder message')).toBeInTheDocument();
+      expect(screen.getByText(/Scheduled For:/)).toBeInTheDocument();
     });
   });
 });

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+
 
 
 const firebaseConfig = {
@@ -18,6 +20,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+connectFirestoreEmulator(db, '127.0.0.1', 8080);
 export {db}
 
 function App() {
@@ -46,6 +49,12 @@ function App() {
   }, []);
 
   const sendReminder = async () => {
+    //check for empty fields
+    if (!to.trim() || !message.trim() || !datetime.trim()) {
+    setStatus('validation-error');
+    return;
+  }
+
     try {
       await addDoc(collection(db, "reminders"), {
         type,
@@ -113,6 +122,8 @@ function App() {
       </div>
 
       <button onClick={sendReminder} className="button">Set Reminder</button>
+      {status === 'validation-error' && <p className="error">Please fill in all fields.</p>}
+
 
       {status === 'success' && <p className="success">Reminder scheduled successfully</p>}
       {status === 'error' && <p className="error">Failed to schedule reminder</p>}
