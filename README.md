@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# 📅 Reminder Web Application – Email Notification Scheduler
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A lightweight, web-based reminder scheduling tool built to help users manage tasks and deadlines via **email notifications**. Designed for busy individuals and remote teams.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Overview
 
-### `npm start`
+Users often forget important tasks, meetings, or deadlines. This project solves that by allowing users to:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Schedule reminders via email
+- View upcoming tasks in a dashboard
+- Get confirmation of successful scheduling
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🔧 Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- ✅ Schedule email reminders with date and time
+- 🧾 View scheduled reminders on a dashboard
+- 🛑 Form validation with error messages
+- 🧠 Firebase Firestore integration
+- ⚙️ Cloud Functions (via Firebase emulator)
+- 🧪 Automated tests with Jest
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🛠️ Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| Layer        | Technology                      |
+|--------------|----------------------------------|
+| Frontend     | React                            |
+| Backend      | Firebase Cloud Functions (Local) |
+| Database     | Firestore (NoSQL)                |
+| Hosting      | Firebase + GitHub CI/CD          |
+| Testing      | Jest, React Testing Library      |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🧪 Testing (Automated)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **✅ Schedule Reminder**: Adds entry to Firestore
+- **⚠️ Input Validation**: Prevents incomplete submissions
+- **📋 Display Reminders**: Loads reminders from DB
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📕 Lessons Learned
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Emulating Firebase functions locally for dev/testing
+- Trade-offs of using cloud functions vs full-stack backend
+- Efficient state management and UI validation in React
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## ⚠️ Challenges & Workarounds
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Couldn’t deploy to Firebase Functions due to billing → used local emulator
+- Switched from MERN to Firebase for faster development
+- Encountered timeouts while testing against remote DB → solved by local emulator setup
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📌 Improvements for Future
 
-### Analyzing the Bundle Size
+- Add SMS reminder support
+- Allow update/delete of existing reminders
+- Use scheduled triggers instead of interval polling (for cost efficiency)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## 🔗 Links
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **GitHub Repo**: [https://github.com/mohammedsrehan/reminder](#)
